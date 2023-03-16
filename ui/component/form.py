@@ -113,7 +113,7 @@ class Input(QLabel):
             self.INPUT_STYLE.format(font_weight='normal', color=color, font_size=28, border_color=border_color))
 
     def set_value(self, value):
-        if value is '':
+        if value == '':
             self.setText(self.default_text)
         else:
             self.setText(value)

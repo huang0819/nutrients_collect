@@ -74,17 +74,17 @@ class KeyBoard(QWidget):
             else:
                 self.grid_layout.addWidget(self.btn_nums[i], (i - 1) // 3, (i - 1) % 3, 1, 1)
 
-        self.bnt_dot = KeyBoardButton('.', (120, 120), self.COMMANDS_DOT, data=None)
-        self.bnt_dot.clicked_signal.connect(self.command_handler)
-        self.grid_layout.addWidget(self.bnt_dot, 3, 1, 1, 1)
+        self.btn_dot = KeyBoardButton('.', (120, 120), self.COMMANDS_DOT, data=None)
+        self.btn_dot.clicked_signal.connect(self.command_handler)
+        self.grid_layout.addWidget(self.btn_dot, 3, 1, 1, 1)
 
-        self.bnt_del = KeyBoardButton('Del', (120, 120), self.COMMANDS_DEL, data=None)
-        self.bnt_del.clicked_signal.connect(self.command_handler)
-        self.grid_layout.addWidget(self.bnt_del, 3, 2, 1, 1)
+        self.btn_del = KeyBoardButton('Del', (120, 120), self.COMMANDS_DEL, data=None)
+        self.btn_del.clicked_signal.connect(self.command_handler)
+        self.grid_layout.addWidget(self.btn_del, 3, 2, 1, 1)
 
-        self.bnt_calibrate = KeyBoardButton('儲存', (420, 120), self.COMMANDS_SAVE, data=None)
-        self.bnt_calibrate.clicked_signal.connect(self.command_handler)
-        self.grid_layout.addWidget(self.bnt_calibrate, 4, 0, 3, 1)
+        self.btn_save = KeyBoardButton('儲存', (420, 120), self.COMMANDS_SAVE, data=None)
+        self.btn_save.clicked_signal.connect(self.command_handler)
+        self.grid_layout.addWidget(self.btn_save, 4, 0, 3, 1)
 
     def command_handler(self, obj):
         if obj['cmd'] == self.COMMANDS_NUM:
@@ -105,3 +105,11 @@ class KeyBoard(QWidget):
 
     def set_output(self, value):
         self.__output = value
+
+    def set_enable(self, enable):
+        self.btn_dot.setEnabled(enable)
+        self.btn_del.setEnabled(enable)
+        self.btn_save.setEnabled(enable)
+
+        for btn in self.btn_nums:
+            btn.setEnabled(enable)

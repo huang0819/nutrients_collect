@@ -26,7 +26,7 @@ class CollectPage(QWidget):
         self.pointers = list()
         for i in range(1, 5):
             x = 240 + (i - 1) % 2 * 470
-            y = 30 + ((i - 1) // 2) * (45 + self.IMG_SIZE[1])
+            y = 30 + ((i - 1) // 2) * (95 + self.IMG_SIZE[1])
             self.pointers.append(Pointer(self, f'{i}', (x, y)))
 
         # form area
@@ -55,7 +55,9 @@ class CollectPage(QWidget):
         self.key_board.save_signal.connect(self.save_handler)
 
         # message window
-        self.message_window = MessageWidget()
+        self.message_window = MessageWidget(self)
+        self.message_window.close_signal.connect(self.close_message_handler)
+
 
     def show_image(self, img):
         len_y, len_x, _ = img.shape
@@ -70,16 +72,17 @@ class CollectPage(QWidget):
         self.key_board.set_output(str(self.forms[index].value))
 
     def input_handler(self, output):
-        if self.selected_form_index is not None and self.form_data[self.selected_form_index][
-            'input_type'] == FormRow.InputType.INPUT:
+        if self.selected_form_index is not None and self.form_data[self.selected_form_index]['input_type'] == FormRow.InputType.INPUT:
             self.forms[self.selected_form_index].set_value(output)
 
     def save_handler(self):
+        self.key_board.setEnabled(False)
         self.selected_form_index = None
 
         invalids = []
         for i, form in enumerate(self.form_data):
             form['value'] = self.forms[i].get_value()
+            self.forms[i].set_selected(False)
             if form['input_type'] is FormRow.InputType.SELECT and form['value'] == 0:
                 invalids.append(form['label'])
 
@@ -95,3 +98,6 @@ class CollectPage(QWidget):
     def show_message(self, text, **kwargs):
         self.message_window.set_message(text, **kwargs)
         self.message_window.show()
+
+    def close_message_handler(self):
+        self.key_board.setEnabled(True)

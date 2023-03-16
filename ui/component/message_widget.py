@@ -1,5 +1,6 @@
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QWidget, QLabel, QDesktopWidget, QPushButton
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton
 
 import ui
 
@@ -8,7 +9,7 @@ class MessageWidget(QWidget):
     FONT_STYLE = \
         """QLabel{{
             color: {color};
-            font: bold 32px 微軟正黑體;
+            font: normal 32px 微軟正黑體;
         }}"""
 
     BTN_STYLE = \
@@ -28,11 +29,22 @@ class MessageWidget(QWidget):
         }}
         """
 
-    def __init__(self, **kwargs):
+    close_signal = pyqtSignal()
+
+    def __init__(self, parent, **kwargs):
         super().__init__()
+        self.setParent(parent)
         self.resize(ui.MESSAGE_WIDTH, ui.MESSAGE_HEIGHT)
-        self.locate_center()
+        self.setGeometry(
+            (ui.APP_WIDTH - ui.MESSAGE_WIDTH) // 2,
+            (ui.APP_HEIGHT - ui.MESSAGE_HEIGHT - 150) // 2,
+            ui.MESSAGE_WIDTH, ui.MESSAGE_HEIGHT
+        )
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+
+        self.background = QLabel('', self)
+        self.background.setGeometry(0, 0, ui.MESSAGE_WIDTH, ui.MESSAGE_HEIGHT)
+        self.background.setStyleSheet(f"background-color: {ui.COLOR.WHITE}")
 
         # Head
         self.head = QLabel('', self)
@@ -49,18 +61,15 @@ class MessageWidget(QWidget):
         self.button = QPushButton('返回', self)
         self.button.setGeometry((ui.MESSAGE_WIDTH - 100) // 2, 81 + 50 + 39 + 48, 100, 50)
         self.button.setStyleSheet(self.BTN_STYLE.format(color=ui.COLOR.BLACK))
-        self.button.clicked.connect(self.close)
+        self.button.clicked.connect(self.close_handler)
 
         self.hide()
-
-    def locate_center(self):
-        sg = QDesktopWidget().screenGeometry()
-        x = (sg.width() - self.width()) // 2
-        y = (sg.height() - self.height()) // 2
-
-        self.move(x, y)
 
     def set_message(self, text, **kwargs):
         self.message.setText(text)
         self.message.setStyleSheet(self.FONT_STYLE.format(color=kwargs.get('color', ui.COLOR.BLACK), ))
         self.head.setStyleSheet(f"background-color: {kwargs.get('color', ui.COLOR.MAIN)}")
+
+    def close_handler(self):
+        self.hide()
+        self.close_signal.emit()

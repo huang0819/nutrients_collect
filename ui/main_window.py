@@ -36,7 +36,7 @@ class MainWindow(QMainWindow):
         self.init_worker.setAutoDelete(True)
         self.thread_pool.start(self.init_worker)
 
-        # self.showFullScreen()
+        self.showFullScreen()
 
     def exit_handler(self):
         if self.is_depth_camera_ok:
