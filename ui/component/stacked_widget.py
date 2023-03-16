@@ -1,9 +1,8 @@
-from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QWidget, QStackedLayout
 
 import ui
-from ui.collect_page import CollectPage
-from ui.message_page import MessagePage
+from ui.page.collect_page import CollectPage
+from ui.page.message_page import MessagePage
 
 
 class StackedWidget(QWidget):
@@ -16,8 +15,8 @@ class StackedWidget(QWidget):
 
         # Loading page
         self.loading_page = MessagePage(text='處理中，請稍候。', font_size=48, wait_time=0)
-        self.loading_page.close_signal.connect(lambda: self.change_page(ui.UI_PAGE_NAME.COLLECT))
-        self.loading_page.start_timer()
+        # Error page
+        self.error_page = MessagePage(text='無法使用深度攝影機，請重新確認後再開啟應用程式。', font_size=48, wait_time=0, color=ui.COLOR.RED)
         # Collect Page
         self.collect_page = CollectPage()
 
@@ -26,14 +25,10 @@ class StackedWidget(QWidget):
         self.setLayout(self.stacked_layout)
 
         self.stacked_layout.addWidget(self.loading_page)
+        self.stacked_layout.addWidget(self.error_page)
         self.stacked_layout.addWidget(self.collect_page)
 
         self.stacked_layout.setCurrentIndex(ui.UI_PAGE_NAME.LOADING)
 
     def change_page(self, page):
         self.stacked_layout.setCurrentIndex(page)
-
-    def show_image(self, img):
-        len_y, len_x, _ = img.shape
-        img = QImage(img.data, len_x, len_y, QImage.Format_RGB888)
-        self.collect_page.image_view.setPixmap(QPixmap.fromImage(img))

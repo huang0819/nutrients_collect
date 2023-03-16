@@ -1,11 +1,12 @@
 from PyQt5.QtCore import QThreadPool
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QPushButton
 
 import ui
-from ui.header import Header
-from ui.stacked_widget import StackedWidget
+from ui.component.header import Header
+from ui.component.stacked_widget import StackedWidget
 from utils.logger import create_logger
 from worker.camera_worker import DepthCameraWorker
+from worker.worker import Worker
 
 
 class MainWindow(QMainWindow):
@@ -28,18 +29,35 @@ class MainWindow(QMainWindow):
         self.stacked_widget = StackedWidget(self)
 
         self.thread_pool = QThreadPool()
-        # self.depth_camera_worker = DepthCameraWorker()
-        # if self.depth_camera_worker.depth_camera is not None:
-        #     self.is_depth_camera_ok = True
-        #     self.depth_camera_worker.signals.data.connect(self.stacked_widget.show_image)
-        #     self.thread_pool.start(self.depth_camera_worker)
-        # else:
-        #     self.is_depth_camera_ok = False
 
-        self.show()
+        # Thread of initialize module
+        self.init_worker = Worker(self.setup_sensors)
+        self.init_worker.signals.finished.connect(self.finish_setup_sensors)
+        self.init_worker.setAutoDelete(True)
+        self.thread_pool.start(self.init_worker)
+
+        # self.showFullScreen()
 
     def exit_handler(self):
-        # self.depth_camera_worker.set_stop(True)
-        # self.depth_camera_worker.depth_camera.pipeline.stop()
+        if self.is_depth_camera_ok:
+            self.depth_camera_worker.set_stop(True)
+            self.depth_camera_worker.depth_camera.pipeline.stop()
+
         self.logger.info('*** Close application ***\n\n')
         self.close()
+
+    def setup_sensors(self):
+        self.depth_camera_worker = DepthCameraWorker()
+        if self.depth_camera_worker.depth_camera is not None:
+            self.is_depth_camera_ok = True
+            self.depth_camera_worker.signals.data.connect(self.stacked_widget.collect_page.show_image)
+            self.thread_pool.start(self.depth_camera_worker)
+        else:
+            self.is_depth_camera_ok = False
+
+    def finish_setup_sensors(self):
+        if self.is_depth_camera_ok:
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
+            self.logger.info(f"[MAIN] depth camera setup {'success' if self.is_depth_camera_ok else 'failed'}")
+        else:
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)

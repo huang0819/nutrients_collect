@@ -1,11 +1,15 @@
+APP_NAME = 'Nutrient data collect tool'
 APP_WIDTH = 1920
 APP_HEIGHT = 1080
-APP_NAME = 'Nutrient data collect tool'
+
+MESSAGE_HEIGHT = 300
+MESSAGE_WIDTH = 600
 
 
 class UI_PAGE_NAME:
     LOADING = 0
-    COLLECT = 1
+    ERROR = 1
+    COLLECT = 2
 
 
 class COLOR:
@@ -13,3 +17,5 @@ class COLOR:
     WHITE = '#FFFFFF'
     BLACK = '#2C2C2C'
     GREY = '#D2D2D2'
+    RED = '#C75450'
+    GREEN = '#388836'
