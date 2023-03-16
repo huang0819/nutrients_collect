@@ -20,7 +20,6 @@ class CollectPage(QWidget):
         # set image area
         self.image_view = QLabel(self)
         self.image_view.setScaledContents(True)
-        self.image_view.setPixmap(QPixmap.fromImage(QImage('resource/photo.png')))
         self.image_view.setGeometry(QtCore.QRect(50, top, *self.IMG_SIZE))
 
         self.pointers = list()
@@ -57,7 +56,6 @@ class CollectPage(QWidget):
         # message window
         self.message_window = MessageWidget(self)
         self.message_window.close_signal.connect(self.close_message_handler)
-
 
     def show_image(self, img):
         len_y, len_x, _ = img.shape
