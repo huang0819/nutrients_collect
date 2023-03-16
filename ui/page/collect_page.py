@@ -1,4 +1,5 @@
 from PyQt5 import QtCore
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QWidget, QLabel
 
@@ -11,6 +12,7 @@ from ui.component.pointer import Pointer
 
 class CollectPage(QWidget):
     IMG_SIZE = (int(640 * 1.5), int(480 * 1.5))
+    save_signal = pyqtSignal(object)
 
     def __init__(self, **kwargs):
         super(CollectPage, self).__init__()
@@ -34,7 +36,7 @@ class CollectPage(QWidget):
             {'attr': 'area', 'label': '餐盤區域', 'unit': '', 'value': 0, 'input_type': FormRow.InputType.SELECT,
              'options': [str(x) for x in range(1, 5)]},
             {'attr': 'name', 'label': '菜色名稱', 'unit': '', 'value': 0, 'input_type': FormRow.InputType.SELECT,
-             'options': [str(x) for x in range(1, 5)]},
+             'options': [str(x) for x in range(1, 86)]},
             {'attr': 'calorie', 'label': '熱量', 'unit': '大卡', 'value': 0, 'input_type': FormRow.InputType.INPUT},
             {'attr': 'protein', 'label': '蛋白質', 'unit': '公克', 'value': 0, 'input_type': FormRow.InputType.INPUT},
             {'attr': 'fat', 'label': '脂肪', 'unit': '公克', 'value': 0, 'input_type': FormRow.InputType.INPUT},
@@ -91,7 +93,8 @@ class CollectPage(QWidget):
             for i, form in enumerate(self.forms):
                 form.reset()
 
-        print(self.form_data)
+            data = dict((f['attr'], f['value']) for f in self. form_data)
+            self.save_signal.emit(data)
 
     def show_message(self, text, **kwargs):
         self.message_window.set_message(text, **kwargs)

@@ -1,3 +1,6 @@
+import os
+from datetime import datetime
+
 from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QMainWindow
 
@@ -15,6 +18,10 @@ class MainWindow(QMainWindow):
         # Create logger
         self.logger = create_logger(logger_name=__name__)
 
+        self.save_folder = 'data'
+        if not os.path.isdir(self.save_folder):
+            os.mkdir(self.save_folder)
+
         # Setting
         self.setWindowTitle(ui.APP_NAME)
         self.resize(ui.APP_WIDTH, ui.APP_HEIGHT)
@@ -27,6 +34,7 @@ class MainWindow(QMainWindow):
 
         # Create stacked widget
         self.stacked_widget = StackedWidget(self)
+        self.stacked_widget.save_signal.connect(self.save_handler)
 
         self.thread_pool = QThreadPool()
 
@@ -59,5 +67,18 @@ class MainWindow(QMainWindow):
             self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
             self.logger.info(f"[MAIN] depth camera setup success")
         else:
-            self.stacked_widget.change_page(ui.UI_PAGE_NAME.ERROR)
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
             self.logger.info(f"[MAIN] depth camera setup failed")
+
+    def save_handler(self, data):
+        self.stacked_widget.change_page(ui.UI_PAGE_NAME.LOADING)
+
+        file_name = '{}'.format(datetime.now().strftime("%Y%m%d%H%M%S"))
+        file_path = os.path.join(self.save_folder, '{}.npz'.format(file_name))
+
+        _worker = Worker(lambda: self.depth_camera_worker.depth_camera.save_file(file_path))
+        _worker.signals.finished.connect(lambda: self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT))
+        _worker.setAutoDelete(True)
+        self.thread_pool.start(_worker)
+
+        self.logger.info(f'[MAIN] save file: {file_name}')

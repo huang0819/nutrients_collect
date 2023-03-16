@@ -1,3 +1,4 @@
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QStackedLayout
 
 import ui
@@ -6,6 +7,8 @@ from ui.page.message_page import MessagePage
 
 
 class StackedWidget(QWidget):
+    save_signal = pyqtSignal(object)
+
     def __init__(self, parent, **kwargs):
         super(StackedWidget, self).__init__()
         self.kwargs = kwargs
@@ -19,6 +22,7 @@ class StackedWidget(QWidget):
         self.error_page = MessagePage(text='無法使用深度攝影機，請重新確認後再開啟應用程式。', font_size=48, wait_time=0, color=ui.COLOR.RED)
         # Collect Page
         self.collect_page = CollectPage()
+        self.collect_page.save_signal.connect(self.save_signal.emit)
 
         # Stacked layout
         self.stacked_layout = QStackedLayout()
