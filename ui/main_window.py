@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QThreadPool
-from PyQt5.QtWidgets import QMainWindow, QPushButton
+from PyQt5.QtWidgets import QMainWindow
 
 import ui
 from ui.component.header import Header
@@ -31,6 +31,7 @@ class MainWindow(QMainWindow):
         self.thread_pool = QThreadPool()
 
         # Thread of initialize module
+        self.is_depth_camera_ok = False
         self.init_worker = Worker(self.setup_sensors)
         self.init_worker.signals.finished.connect(self.finish_setup_sensors)
         self.init_worker.setAutoDelete(True)
@@ -52,12 +53,11 @@ class MainWindow(QMainWindow):
             self.is_depth_camera_ok = True
             self.depth_camera_worker.signals.data.connect(self.stacked_widget.collect_page.show_image)
             self.thread_pool.start(self.depth_camera_worker)
-        else:
-            self.is_depth_camera_ok = False
 
     def finish_setup_sensors(self):
         if self.is_depth_camera_ok:
             self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
-            self.logger.info(f"[MAIN] depth camera setup {'success' if self.is_depth_camera_ok else 'failed'}")
+            self.logger.info(f"[MAIN] depth camera setup success")
         else:
-            self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.ERROR)
+            self.logger.info(f"[MAIN] depth camera setup failed")
