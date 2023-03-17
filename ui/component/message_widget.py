@@ -1,6 +1,6 @@
 from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QGraphicsDropShadowEffect
 
 import ui
 
@@ -40,7 +40,9 @@ class MessageWidget(QWidget):
             (ui.APP_HEIGHT - ui.MESSAGE_HEIGHT - 150) // 2,
             ui.MESSAGE_WIDTH, ui.MESSAGE_HEIGHT
         )
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(15)
+        self.setGraphicsEffect(shadow)
 
         self.background = QLabel('', self)
         self.background.setGeometry(0, 0, ui.MESSAGE_WIDTH, ui.MESSAGE_HEIGHT)

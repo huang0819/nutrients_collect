@@ -71,6 +71,7 @@ class MainWindow(QMainWindow):
             self.logger.info(f"[MAIN] depth camera setup failed")
 
     def save_handler(self, data):
+        print(data)
         self.stacked_widget.change_page(ui.UI_PAGE_NAME.LOADING)
 
         file_name = '{}'.format(datetime.now().strftime("%Y%m%d%H%M%S"))
@@ -82,3 +83,4 @@ class MainWindow(QMainWindow):
         self.thread_pool.start(_worker)
 
         self.logger.info(f'[MAIN] save file: {file_name}')
+

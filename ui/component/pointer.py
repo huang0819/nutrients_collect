@@ -1,13 +1,13 @@
-from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QLabel
+from PyQt5.QtWidgets import QPushButton
 
 import ui
 
 
-class Pointer(QWidget):
+class Pointer(QPushButton):
     FONT_STYLE = \
-        """QLabel{{
+        """
+        QPushButton {{
             color: {color};
             font: bold 28px 微軟正黑體;
             background-color: {background_color};
@@ -15,24 +15,24 @@ class Pointer(QWidget):
             border-radius: 30px;
         }}
         QPushButton:pressed {{
-            background-color: #D9D9D9;
-            border-style: solid;
+            background-color: {background_pressed_color};
+            border: 1px solid {background_pressed_color};
         }}
         """
     SIZE = (60, 60)
 
-    button_exit_signal = pyqtSignal()
+    clicked_signal = pyqtSignal(int)
 
     def __init__(self, parent, label, start, **kwargs):
-        super(Pointer, self).__init__()
-        self.setParent(parent)
+        super(Pointer, self).__init__(label, parent)
+        self.kwargs = kwargs
 
-        # label
-        self.label = QLabel(label, self)
-        self.label.setStyleSheet(self.FONT_STYLE.format(
+        self.setStyleSheet(self.FONT_STYLE.format(
             color=ui.COLOR.WHITE,
-            background_color=ui.COLOR.MAIN
+            background_color=ui.COLOR.MAIN,
+            background_pressed_color=ui.COLOR.MAIN_SUB
         ))
-        self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.setGeometry(*start, *self.SIZE)
 
+        self.setGeometry(*start, *self.SIZE)
+
+        self.clicked.connect(lambda: self.clicked_signal.emit(self.kwargs.get('index', 0)))

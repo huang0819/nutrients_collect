@@ -1,6 +1,5 @@
-from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout, QComboBox
+from PyQt5.QtWidgets import QWidget, QLabel, QGridLayout
 
 import ui
 
@@ -8,7 +7,8 @@ import ui
 class FormRow(QWidget):
     class InputType:
         INPUT = 0
-        SELECT = 1
+        AREA_SELECT = 1
+        DISH_SELECT = 2
 
     FONT_STYLE = \
         """QLabel{{
@@ -22,6 +22,7 @@ class FormRow(QWidget):
         super(FormRow, self).__init__()
         self.setParent(parent)
         self.index = index
+        assert input_type in [self.InputType.INPUT, self.InputType.AREA_SELECT, self.InputType.DISH_SELECT], 'input_type error '
         self.input_type = input_type
 
         self.layout = QGridLayout()
@@ -35,13 +36,8 @@ class FormRow(QWidget):
         # Input
         self.selected = False
 
-        if input_type == self.InputType.INPUT:
-            self.input = Input(self, label)
-            self.value = ''
-        elif input_type == self.InputType.SELECT:
-            self.input = Select(self, label, kwargs.get('options'))
-            self.input.data_signal.connect(self.set_value)
-            self.value = self.input.currentIndex()
+        self.input = Input(self, label)
+        self.value = ''
 
         self.layout.addWidget(self.input, 1, 0)
 
@@ -74,14 +70,16 @@ class FormRow(QWidget):
                 return float(self.value)
             except:
                 return 0.0
-        elif self.input_type == self.InputType.SELECT:
+        elif self.input_type == self.InputType.DISH_SELECT:
             return self.value
+        elif self.input_type == self.InputType.AREA_SELECT:
+            try:
+                return int(self.value)
+            except:
+                return 0
 
     def reset(self):
-        if self.input_type == self.InputType.INPUT:
-            self.value = ''
-        elif self.input_type == self.InputType.SELECT:
-            self.value = 0
+        self.value = ''
 
         self.input.set_value(self.value)
         self.set_selected(False)
@@ -117,81 +115,3 @@ class Input(QLabel):
             self.setText(self.default_text)
         else:
             self.setText(value)
-
-
-class Select(QComboBox):
-    SELECT_STYLE = """
-            QComboBox {{
-                color: {color};
-                font: {font_weight} {font_size}px 微軟正黑體;
-                background-color: {background_color};
-                border: 1px solid {border_color};
-                border-radius: 5px;
-                padding-left: 15px;
-            }}
-            QComboBox::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 20px;
-            
-                border-left-width: 1px;
-                border-left-color: {border_color};
-                border-left-style: solid; /* just a single line */
-                border-top-right-radius: 3px; /* same radius as the QComboBox */
-                border-bottom-right-radius: 3px;
-            }}
-            QComboBox::down-arrow {{
-                image: url(resource/drop_down.png);
-                width: 20px;
-            }}
-            QComboBox QAbstractItemView {{
-                font: {font_weight} {font_size}px 微軟正黑體;
-                color: {item_color};
-                background-color: {background_color};
-                border: 1px solid {border_color};
-            }}
-        """
-    data_signal = pyqtSignal(int)
-
-    def __init__(self, parent, label, options):
-        super(Select, self).__init__()
-
-        self.setParent(parent)
-        self.options = options
-        self.label = label
-
-        self.set_options()
-        self.currentIndexChanged.connect(self.data_signal.emit)
-
-        self.style_dict = {
-            'font_weight': 'normal',
-            'color': ui.COLOR.BLACK,
-            'font_size': 28,
-            'background_color': ui.COLOR.WHITE,
-            'border_color': ui.COLOR.BLACK,
-            'item_color': ui.COLOR.BLACK,
-        }
-
-        self.setStyleSheet(self.SELECT_STYLE.format(**self.style_dict))
-
-        self.setMaximumWidth(250)
-        self.setMinimumWidth(250)
-
-        self.setView(QtWidgets.QListView())
-
-    def set_options(self):
-        self.options = [f'請選擇{self.label}'] + self.options
-        self.addItems(self.options)
-        self.setCurrentIndex(0)
-
-    def handler(self, index):
-        self.data_signal.emit(index)
-
-    def set_value(self, value):
-        self.setCurrentIndex(value)
-
-    def set_selected(self, selected):
-        pass
-
-    def reset(self):
-        pass
