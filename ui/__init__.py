@@ -20,3 +20,9 @@ class COLOR:
     GREY = '#D2D2D2'
     RED = '#C75450'
     GREEN = '#388836'
+
+
+class Message:
+    LOADING = '處理中，請稍候。'
+    CAMERA_ERR = '無法使用深度攝影機，請重新確認後再開啟應用程式。'
+    NET_ERR = '網路連線異常，請重新確認後再開啟應用程式。'

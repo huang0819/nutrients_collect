@@ -127,3 +127,6 @@ class CollectPage(QWidget):
         if self.selected_form_index is not None and \
                 self.form_data[self.selected_form_index]['input_type'] == FormRow.InputType.AREA_SELECT:
             self.forms[self.selected_form_index].set_value(str(index))
+
+    def set_dish_selector_option(self, data):
+        self.dish_select.set_menu(data)

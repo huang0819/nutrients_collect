@@ -55,3 +55,6 @@ class MessagePage(QWidget):
     def close_handler(self):
         self.close_signal.emit()
         self.timer.stop()
+
+    def set_message(self, text):
+        self.message.setText(text)

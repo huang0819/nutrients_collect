@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow
 import ui
 from ui.component.header import Header
 from ui.component.stacked_widget import StackedWidget
+from utils.api import Api
 from utils.logger import create_logger
 from worker.camera_worker import DepthCameraWorker
 from worker.worker import Worker
@@ -22,10 +23,14 @@ class MainWindow(QMainWindow):
         if not os.path.isdir(self.save_folder):
             os.mkdir(self.save_folder)
 
+        self.thread_pool = QThreadPool()
+        self.api = Api('http://localhost:8082')
+
         # Setting
         self.setWindowTitle(ui.APP_NAME)
         self.resize(ui.APP_WIDTH, ui.APP_HEIGHT)
         self.setStyleSheet(f"background-color: {ui.COLOR.WHITE}")
+        self.get_dishes()
 
         # Create header
         self.header = Header(self, '飲食分析資料收集工具')
@@ -35,8 +40,6 @@ class MainWindow(QMainWindow):
         # Create stacked widget
         self.stacked_widget = StackedWidget(self)
         self.stacked_widget.save_signal.connect(self.save_handler)
-
-        self.thread_pool = QThreadPool()
 
         # Thread of initialize module
         self.is_depth_camera_ok = False
@@ -84,3 +87,14 @@ class MainWindow(QMainWindow):
 
         self.logger.info(f'[MAIN] save file: {file_name}')
 
+    def get_dishes(self):
+        _worker = Worker(self.api.get_dishes, year=2023, month=3)
+        _worker.signals.result.connect(self.set_dish_options)
+        _worker.setAutoDelete(True)
+        self.thread_pool.start(_worker)
+
+    def set_dish_options(self, data):
+        if data['status_code'] != 200:
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.ERROR, err_msg=ui.Message.NET_ERR)
+        else:
+            self.stacked_widget.set_collect_page_dishes_option(data['data'])

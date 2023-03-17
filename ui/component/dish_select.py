@@ -78,6 +78,8 @@ class DishSelect(QWidget):
     def __init__(self, parent, **kwargs):
         super().__init__()
         self.date = datetime.now()
+        self.menus = {}
+
         self.setParent(parent)
         self.setGeometry(
             (ui.APP_WIDTH - 450) // 2,
@@ -159,8 +161,6 @@ class DishSelect(QWidget):
             self.radio_buttons[i].setStyleSheet(self.RADIO_STYLE.format(hover_color=ui.COLOR.MAIN))
             self.button_group.addButton(self.radio_buttons[i], i)
 
-        self.set_options(kwargs.get('options'))
-
         # Button
         self.button = QPushButton('確認', self)
         self.button.setGeometry(175, 580, 100, 50)
@@ -181,12 +181,19 @@ class DishSelect(QWidget):
     def change_date(self, day_delta):
         self.date = self.date + timedelta(days=day_delta)
         self.date_display.setText(self.date.strftime('%Y / %m / %d'))
+        self.set_options()
 
-    def set_options(self, options):
+    def set_options(self):
+        options = self.menus.get(self.date.strftime('%Y-%m-%d'), [{'dish_name': f'食譜{i + 1}'} for i in range(4)])
+
         for option, radio_button in zip(options, self.radio_buttons):
-            radio_button.setText(option)
+            radio_button.setText(option['dish_name'])
             radio_button.setChecked(False)
         self.radio_buttons[0].setChecked(True)
 
     def reset(self):
         self.radio_buttons[0].setChecked(True)
+
+    def set_menu(self, data):
+        self.menus = data
+        self.set_options()
