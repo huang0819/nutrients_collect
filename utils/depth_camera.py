@@ -7,7 +7,7 @@ import pyrealsense2.pyrealsense2 as rs
 class DepthCamera:
     def __init__(self):
         self.logger = create_logger(__name__)
-        self.logger.info('[DEPTH CAMERA] setup module')
+        self.logger.info('setup module')
         self.depth_image = None
         self.color_image = None
         self.depth_intrinsic = None
@@ -28,7 +28,7 @@ class DepthCamera:
                 found_rgb = True
                 break
         if not found_rgb:
-            self.logger.info('[DEPTH CAMERA] the demo requires Depth camera with Color sensor')
+            self.logger.info('the demo requires Depth camera with Color sensor')
             exit(0)
 
         config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
@@ -49,7 +49,7 @@ class DepthCamera:
         depth_sensor = profile.get_device().first_depth_sensor()
         self.depth_scale = depth_sensor.get_depth_scale()
 
-        self.logger.info('[DEPTH CAMERA] depth scale is: {}'.format(self.depth_scale))
+        self.logger.info('depth scale is: {}'.format(self.depth_scale))
 
     def read(self):
         # Wait for a coherent pair of frames: depth and color
@@ -96,6 +96,6 @@ if __name__ == '__main__':
             cv2.imshow('img', img)
             cv2.waitKey(0)
             cv2.destroyAllWindows()
-    except Exception as e :
+    except Exception as e:
         print("[DEPTH CAMERA WORKER] catch an exception.")
         print(e)

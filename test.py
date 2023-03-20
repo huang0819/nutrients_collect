@@ -56,5 +56,5 @@ class Tray:
 
 
 if __name__ == '__main__':
-    tray = Tray('data/20230316164724.npz')
+    tray = Tray(r"D:\Downloads\data_2023-03-19_2023-03-20\20230316164724.npz")
     tray.show()

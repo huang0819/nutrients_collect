@@ -21,7 +21,7 @@ class DepthCameraWorker(QRunnable):
             self.depth_camera = DepthCamera()
             self.stop = False
         except:
-            self.logger.error("[DEPTH CAMERA WORKER] camera not found")
+            self.logger.error("camera not found")
             self.depth_camera = None
             self.stop = True
 
@@ -34,7 +34,7 @@ class DepthCameraWorker(QRunnable):
                     rgb_image = np.copy(image[:, :, ::-1])
                     self.signals.data.emit(rgb_image)
         except:
-            self.logger.error("[DEPTH CAMERA WORKER] catch an exception.", exc_info=True)
+            self.logger.error("catch an exception.", exc_info=True)
         finally:
             self.signals.finished.emit()
 

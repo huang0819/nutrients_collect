@@ -35,13 +35,13 @@ class CollectPage(QWidget):
         # form area
         self.selected_form_index = None
         self.form_data = [
-            {'attr': 'area', 'label': '餐盤區域', 'unit': '', 'value': None, 'input_type': FormRow.InputType.AREA_SELECT,
+            {'attr': 'region', 'label': '餐盤區域', 'unit': '', 'value': None, 'input_type': FormRow.InputType.REGION_SELECT,
              'options': [str(x) for x in range(1, 5)]},
-            {'attr': 'name', 'label': '菜色名稱', 'unit': '', 'value': None, 'input_type': FormRow.InputType.DISH_SELECT},
+            {'attr': 'dish_name', 'label': '菜色名稱', 'unit': '', 'value': None, 'input_type': FormRow.InputType.DISH_SELECT},
             {'attr': 'calorie', 'label': '熱量', 'unit': '大卡', 'value': None, 'input_type': FormRow.InputType.INPUT},
             {'attr': 'protein', 'label': '蛋白質', 'unit': '公克', 'value': None, 'input_type': FormRow.InputType.INPUT},
             {'attr': 'fat', 'label': '脂肪', 'unit': '公克', 'value': None, 'input_type': FormRow.InputType.INPUT},
-            {'attr': 'carbohydrate', 'label': '碳水化合物', 'unit': '公克', 'value': None,
+            {'attr': 'carbohydrates', 'label': '碳水化合物', 'unit': '公克', 'value': None,
              'input_type': FormRow.InputType.INPUT}
         ]
 
@@ -94,7 +94,7 @@ class CollectPage(QWidget):
         for i, form in enumerate(self.form_data):
             form['value'] = self.forms[i].get_value()
             self.forms[i].set_selected(False)
-            if (form['input_type'] == FormRow.InputType.AREA_SELECT and form['value'] == 0) or \
+            if (form['input_type'] == FormRow.InputType.REGION_SELECT and form['value'] == 0) or \
                     (form['input_type'] == FormRow.InputType.DISH_SELECT and form['value'] == ''):
                 invalids.append(form['label'])
 
@@ -107,6 +107,8 @@ class CollectPage(QWidget):
                 form.reset()
 
             data = dict((f['attr'], f['value']) for f in self.form_data)
+            data['meal_date'] = self.dish_select.get_date().strftime('%Y-%m-%d')
+
             self.save_signal.emit(data)
 
     def show_message(self, text, **kwargs):
@@ -125,7 +127,7 @@ class CollectPage(QWidget):
 
     def pointer_click_handler(self, index):
         if self.selected_form_index is not None and \
-                self.form_data[self.selected_form_index]['input_type'] == FormRow.InputType.AREA_SELECT:
+                self.form_data[self.selected_form_index]['input_type'] == FormRow.InputType.REGION_SELECT:
             self.forms[self.selected_form_index].set_value(str(index))
 
     def set_dish_selector_option(self, data):

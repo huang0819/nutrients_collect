@@ -1,0 +1,6 @@
+env_variables:
+  app_version: '1.0'
+  debug: true
+
+server:
+  url: 'http://140.116.56.12'

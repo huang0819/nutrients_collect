@@ -1,7 +1,8 @@
+import json
 import os
 from datetime import datetime
 
-from PyQt5.QtCore import QThreadPool
+from PyQt5.QtCore import QThreadPool, QTimer
 from PyQt5.QtWidgets import QMainWindow
 
 import ui
@@ -24,7 +25,7 @@ class MainWindow(QMainWindow):
             os.mkdir(self.save_folder)
 
         self.thread_pool = QThreadPool()
-        self.api = Api('http://localhost:8082')
+        self.api = Api()
 
         # Setting
         self.setWindowTitle(ui.APP_NAME)
@@ -48,6 +49,14 @@ class MainWindow(QMainWindow):
         self.init_worker.setAutoDelete(True)
         self.thread_pool.start(self.init_worker)
 
+        # Wait 1 second for saving file
+        self.timer = QTimer()
+        self.timer.setInterval(1000)
+        self.timer.timeout.connect(self.save_file)
+
+        self.data = None
+        self.file_name = None
+        self.file_path = None
         self.showFullScreen()
 
     def exit_handler(self):
@@ -68,24 +77,88 @@ class MainWindow(QMainWindow):
     def finish_setup_sensors(self):
         if self.is_depth_camera_ok:
             self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
-            self.logger.info(f"[MAIN] depth camera setup success")
+            self.logger.info(f"depth camera setup success")
         else:
             self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
-            self.logger.info(f"[MAIN] depth camera setup failed")
+            self.logger.info(f"depth camera setup failed")
 
     def save_handler(self, data):
-        print(data)
+        self.data = data
         self.stacked_widget.change_page(ui.UI_PAGE_NAME.LOADING)
+        self.timer.start()
 
-        file_name = '{}'.format(datetime.now().strftime("%Y%m%d%H%M%S"))
-        file_path = os.path.join(self.save_folder, '{}.npz'.format(file_name))
+    def save_file(self):
+        self.timer.stop()
 
-        _worker = Worker(lambda: self.depth_camera_worker.depth_camera.save_file(file_path))
-        _worker.signals.finished.connect(lambda: self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT))
+        self.file_name = '{}'.format(datetime.now().strftime("%Y%m%d%H%M%S"))
+        file_dir = os.path.join(self.save_folder, self.data['meal_date'])
+        self.file_path = os.path.join(file_dir, f'{self.file_name}.npz')
+
+        if not os.path.isdir(file_dir):
+            os.mkdir(file_dir)
+
+        self.logger.info(f'save file: {self.file_name}')
+
+        _worker = Worker(lambda: self.depth_camera_worker.depth_camera.save_file(self.file_path))
+        _worker.signals.finished.connect(self.upload_file)
         _worker.setAutoDelete(True)
         self.thread_pool.start(_worker)
 
-        self.logger.info(f'[MAIN] save file: {file_name}')
+    def upload_file(self):
+        data = {
+            'payload': self.data,
+            'file_path': self.file_path,
+            'file_name': self.file_name,
+        }
+
+        _worker = Worker(self.api.upload_data, data=data)
+        _worker.setAutoDelete(True)
+        _worker.signals.result.connect(self.upload_response_handler)
+        _worker.signals.error.connect(self.upload_error_handler)
+        _worker.signals.finished.connect(lambda: self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT))
+        self.thread_pool.start(_worker)
+
+    def upload_response_handler(self, res):
+        self.save_json({
+            self.file_name: {
+                **self.data,
+                'is_upload': 1 if res['status_code'] == 200 else 0
+            }
+        })
+
+        self.data = None
+        self.file_name = None
+        self.file_path = None
+
+    def upload_error_handler(self, err):
+        self.save_json({
+            self.file_name: {
+                **self.data,
+                'is_upload': 0
+            }
+        })
+
+        self.data = None
+        self.file_name = None
+        self.file_path = None
+
+    def save_json(self, data):
+        json_path = os.path.join(self.save_folder, self.data['meal_date'], 'data.json')
+        try:
+            if os.path.isfile(json_path):
+                with open(json_path, encoding='utf8') as json_file:
+                    json_data = json.load(json_file)
+            else:
+                json_data = {}
+
+            json_data.update(data)
+
+            with open(json_path, 'w') as outfile:
+                json.dump(json_data, outfile, indent=4, ensure_ascii=False)
+
+            self.logger.info('save json success')
+        except:
+            self.logger.error('save json failed', exc_info=True)
 
     def get_dishes(self):
         _worker = Worker(self.api.get_dishes, year=2023, month=3)

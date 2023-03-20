@@ -7,7 +7,7 @@ import ui
 class FormRow(QWidget):
     class InputType:
         INPUT = 0
-        AREA_SELECT = 1
+        REGION_SELECT = 1
         DISH_SELECT = 2
 
     FONT_STYLE = \
@@ -22,7 +22,7 @@ class FormRow(QWidget):
         super(FormRow, self).__init__()
         self.setParent(parent)
         self.index = index
-        assert input_type in [self.InputType.INPUT, self.InputType.AREA_SELECT, self.InputType.DISH_SELECT], 'input_type error '
+        assert input_type in [self.InputType.INPUT, self.InputType.REGION_SELECT, self.InputType.DISH_SELECT], 'input_type error '
         self.input_type = input_type
 
         self.layout = QGridLayout()
@@ -72,7 +72,7 @@ class FormRow(QWidget):
                 return 0.0
         elif self.input_type == self.InputType.DISH_SELECT:
             return self.value
-        elif self.input_type == self.InputType.AREA_SELECT:
+        elif self.input_type == self.InputType.REGION_SELECT:
             try:
                 return int(self.value)
             except:

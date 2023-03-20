@@ -183,6 +183,9 @@ class DishSelect(QWidget):
         self.date_display.setText(self.date.strftime('%Y / %m / %d'))
         self.set_options()
 
+    def get_date(self):
+        return self.date
+
     def set_options(self):
         options = self.menus.get(self.date.strftime('%Y-%m-%d'), [{'dish_name': f'食譜{i + 1}'} for i in range(4)])
 
