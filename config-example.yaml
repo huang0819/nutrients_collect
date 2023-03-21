@@ -3,4 +3,4 @@ env_variables:
   debug: true
 
 server:
-  url: 'http://140.116.56.12'
+  url: 'http://server ip'
