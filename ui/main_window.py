@@ -79,7 +79,7 @@ class MainWindow(QMainWindow):
             self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
             self.logger.info(f"depth camera setup success")
         else:
-            self.stacked_widget.change_page(ui.UI_PAGE_NAME.COLLECT)
+            self.stacked_widget.change_page(ui.UI_PAGE_NAME.ERROR, err_msg=ui.Message.CAMERA_ERR)
             self.logger.info(f"depth camera setup failed")
 
     def save_handler(self, data):
