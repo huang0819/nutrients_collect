@@ -26,9 +26,14 @@ class CollectPage(QWidget):
         self.image_view.setGeometry(QtCore.QRect(50, top, *self.IMG_SIZE))
 
         self.pointers = list()
-        for i in range(1, 5):
-            x = 240 + (i - 1) % 2 * 470
-            y = 30 + ((i - 1) // 2) * (95 + self.IMG_SIZE[1])
+        x = (240 + 240 + 480) // 2
+        y = 30
+        self.pointers.append(Pointer(self, f'{1}', (x, y), index=1))
+        self.pointers[-1].clicked_signal.connect(self.pointer_click_handler)
+
+        for i in range(2, 5):
+            x = (240 + 240 + 480) // 2 + (i - 3) * 300
+            y = 30 + 95 + self.IMG_SIZE[1]
             self.pointers.append(Pointer(self, f'{i}', (x, y), index=i))
             self.pointers[-1].clicked_signal.connect(self.pointer_click_handler)
 
