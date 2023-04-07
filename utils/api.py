@@ -8,8 +8,8 @@ class Api:
         self.base_url = utils.config.url
         self.logger = create_logger(__name__)
 
-    def get_dishes(self, year, month):
-        url = f'{self.base_url}/api/hospitalDishes?year={year}&month={month}'
+    def get_dishes(self, year):
+        url = f'{self.base_url}/api/hospitalDishes?year={year}'
 
         payload = {}
         headers = {}

@@ -161,7 +161,8 @@ class MainWindow(QMainWindow):
             self.logger.error('save json failed', exc_info=True)
 
     def get_dishes(self):
-        _worker = Worker(self.api.get_dishes, year=2023, month=3)
+        now = datetime.now()
+        _worker = Worker(self.api.get_dishes, year=now.year)
         _worker.signals.result.connect(self.set_dish_options)
         _worker.setAutoDelete(True)
         self.thread_pool.start(_worker)
