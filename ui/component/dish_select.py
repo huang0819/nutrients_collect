@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 
 from PyQt5 import QtCore
-from PyQt5.QtCore import pyqtSignal, QDate
-from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QDateEdit, QButtonGroup, QRadioButton, \
-    QGraphicsDropShadowEffect
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QButtonGroup, QRadioButton, \
+    QGraphicsDropShadowEffect, QVBoxLayout, QScrollArea
 
 import ui
 
@@ -152,14 +152,26 @@ class DishSelect(QWidget):
         ))
         self.food_label.setAlignment(QtCore.Qt.AlignCenter)
 
+        self.radio_button_area = QWidget(self)
+        self.vbox = QVBoxLayout(self)
+        self.vbox.setSpacing(40)
+        self.scroll_area = QScrollArea(self)
+        self.radio_button_area.setLayout(self.vbox)
+
+        self.scroll_area.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setWidget(self.radio_button_area)
+        self.scroll_area.setGeometry(50, 250, 340, 290)
+
         self.button_group = QButtonGroup(self)
 
         self.radio_buttons = list()
-        for i in range(4):
-            self.radio_buttons.append(QRadioButton(f'{i}', self))
-            self.radio_buttons[i].setGeometry(50, 250 + (50 + 30) * i, 340, 50)
-            self.radio_buttons[i].setStyleSheet(self.RADIO_STYLE.format(hover_color=ui.COLOR.MAIN))
-            self.button_group.addButton(self.radio_buttons[i], i)
+        # for i in range(4):
+        #     self.radio_buttons.append(QRadioButton(f'{i}', self))
+        #     self.radio_buttons[i].setGeometry(50, 250 + (50 + 30) * i, 340, 50)
+        #     self.radio_buttons[i].setStyleSheet(self.RADIO_STYLE.format(hover_color=ui.COLOR.MAIN))
+        #     self.button_group.addButton(self.radio_buttons[i], i)
 
         # Button
         self.button = QPushButton('確認', self)
@@ -189,9 +201,17 @@ class DishSelect(QWidget):
     def set_options(self):
         options = self.menus.get(self.date.strftime('%Y-%m-%d'), [{'dish_name': f'食譜{i + 1}'} for i in range(4)])
 
-        for option, radio_button in zip(options, self.radio_buttons):
-            radio_button.setText(option['dish_name'])
-            radio_button.setChecked(False)
+        for radio_button in self.radio_buttons:
+            radio_button.setParent(None)
+        self.radio_buttons.clear()
+
+        for i, option in enumerate(options):
+            self.radio_buttons.append(QRadioButton(option['dish_name']))
+            self.radio_buttons[i].setStyleSheet(self.RADIO_STYLE.format(hover_color=ui.COLOR.MAIN))
+            self.button_group.addButton(self.radio_buttons[i], i)
+
+            self.vbox.addWidget(self.radio_buttons[i])
+
         self.radio_buttons[0].setChecked(True)
 
     def reset(self):
